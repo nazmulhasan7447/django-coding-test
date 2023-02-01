@@ -4,7 +4,24 @@ from config.g_model import TimeStampMixin
 
 # Create your models here.
 class Variant(TimeStampMixin):
+    COLOR_CHOICES = (
+        ('green', 'GREEN'),
+        ('blue', 'BLUE'),
+        ('red', 'RED'),
+        ('orange', 'ORANGE'),
+        ('black', 'BLACK'),
+    )
+
+    SIZE_CHOICES = (
+        ('xl', 'XL'),
+        ('sm', 'SM'),
+        ('md', 'MD'),
+        ('xs', 'XS'),
+    )
+
     title = models.CharField(max_length=40, unique=True)
+    color = models.CharField(max_length=15, choices=COLOR_CHOICES, blank=True, null=True)
+    size = models.CharField(max_length=15, choices=SIZE_CHOICES, blank=True, null=True)
     description = models.TextField()
     active = models.BooleanField(default=True)
 

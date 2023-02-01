@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import TagsInput from "react-tagsinput";
 import "react-tagsinput/react-tagsinput.css";
 import Dropzone from "react-dropzone";
+import Axios from "axios";
+import { size } from "lodash";
+
+Axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+Axios.defaults.xsrfCookieName = "csrftoken";
 
 const CreateProduct = (props) => {
+  const [productInfo, setProductInfo] = useState({});
   const [productVariantPrices, setProductVariantPrices] = useState([]);
+
+  console.log(productInfo);
 
   const [productVariants, setProductVariant] = useState([
     {
@@ -12,7 +20,7 @@ const CreateProduct = (props) => {
       tags: [],
     },
   ]);
-  console.log(typeof props.variants);
+
   // handle click event of the Add button
   const handleAddClick = () => {
     let all_variants = JSON.parse(props.variants.replaceAll("'", '"')).map(
@@ -57,16 +65,30 @@ const CreateProduct = (props) => {
 
     setProductVariantPrices([]);
 
-    getCombn(tags).forEach((item) => {
+    getCombn(tags).forEach((item, index) => {
       setProductVariantPrices((productVariantPrice) => [
         ...productVariantPrice,
         {
+          index,
           title: item,
           price: 0,
           stock: 0,
         },
       ]);
     });
+  };
+
+  const varientHandler = (e, index) => {
+    console.log(e.target.name);
+    // console.log("value", e);
+    // console.log("index", index);
+    setProductVariantPrices([
+      ...productVariantPrices?.filter((item) => item?.index !== index),
+      {
+        ...productVariantPrices?.filter((item) => item?.index === index)[0],
+        [e.target.name]: e.target.value,
+      },
+    ]);
   };
 
   // combination algorithm
@@ -81,10 +103,26 @@ const CreateProduct = (props) => {
     return ans;
   }
 
+  const hanldeProductInfoChange = (e) => {
+    setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
+  };
+
   // Save product
   let saveProduct = (event) => {
     event.preventDefault();
+    console.log(productVariantPrices);
+    console.log(productInfo);
     // TODO : write your code here to save the product
+    Axios.post("/product/add/product/", {
+      ...productInfo,
+      productVariantPrices,
+    })
+      .then((response) => {
+        console.log(response);
+      })
+      .then((error) => {
+        console.log(error);
+      });
   };
 
   return (
@@ -100,14 +138,18 @@ const CreateProduct = (props) => {
                     type="text"
                     placeholder="Product Name"
                     className="form-control"
+                    name="product_name"
+                    onChange={hanldeProductInfoChange}
                   />
                 </div>
                 <div className="form-group">
                   <label htmlFor="">Product SKU</label>
                   <input
                     type="text"
-                    placeholder="Product Name"
+                    placeholder="Product SKU"
                     className="form-control"
+                    name="product_sku"
+                    onChange={hanldeProductInfoChange}
                   />
                 </div>
                 <div className="form-group">
@@ -117,6 +159,8 @@ const CreateProduct = (props) => {
                     cols="30"
                     rows="4"
                     className="form-control"
+                    name="product_description"
+                    onChange={hanldeProductInfoChange}
                   ></textarea>
                 </div>
               </div>
@@ -128,7 +172,12 @@ const CreateProduct = (props) => {
               </div>
               <div className="card-body border">
                 <Dropzone
-                  onDrop={(acceptedFiles) => console.log(acceptedFiles)}
+                  onDrop={(acceptedFiles) =>
+                    setProductInfo({
+                      ...productInfo,
+                      product_img: acceptedFiles[0],
+                    })
+                  }
                 >
                   {({ getRootProps, getInputProps }) => (
                     <section>
@@ -233,10 +282,20 @@ const CreateProduct = (props) => {
                             <tr key={index}>
                               <td>{productVariantPrice.title}</td>
                               <td>
-                                <input className="form-control" type="text" />
+                                <input
+                                  className="form-control"
+                                  name="price"
+                                  onChange={(e) => varientHandler(e, index)}
+                                  type="text"
+                                />
                               </td>
                               <td>
-                                <input className="form-control" type="text" />
+                                <input
+                                  className="form-control"
+                                  type="text"
+                                  name="stock"
+                                  onChange={(e) => varientHandler(e, index)}
+                                />
                               </td>
                             </tr>
                           );

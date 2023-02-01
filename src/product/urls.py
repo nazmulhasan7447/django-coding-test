@@ -4,6 +4,7 @@ from product.views import products
 
 from product.views.product import CreateProductView
 from product.views.variant import VariantView, VariantCreateView, VariantEditView
+from .API.apiViews import AddProductView
 
 app_name = "product"
 
@@ -15,6 +16,7 @@ urlpatterns = [
 
     # Products URLs
     path('create/', CreateProductView.as_view(), name='create.product'),
+    re_path(r'^add/product/$', AddProductView.as_view(), name='add-product'),
     # path('list/', TemplateView.as_view(template_name='products/list.html', extra_context={
     #     'product': True
     # }), name='list.product'),

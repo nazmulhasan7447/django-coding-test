@@ -7,20 +7,27 @@
 </div>
 
 
+
 <div class="card">
-    <form action="" method="get" class="card-header">
+    <form action="{% url 'product:product_list' %}" method="GET" class="card-header">
+
         <div class="form-row justify-content-between">
             <div class="col-md-2">
                 <input
                         type="text"
                         name="title"
                         placeholder="Product Title"
-                        class="form-control"
+                        class="form-control title"
                 />
             </div>
             <div class="col-md-2">
-                <select name="variant" id="" class="form-control">
+                <select name="variant" id="" class="form-control varient">
                     <option selected disabled>--Select A Variant--</option>
+                    {% if varients %}
+                    {% for varient in varients %}
+                    <option value="{{varient.pk}}">{{varient.title}}</option>
+                    {% endfor %}
+                    {% endif %}
                 </select>
             </div>
 
@@ -30,18 +37,20 @@
                         <span class="input-group-text">Price Range</span>
                     </div>
                     <input
-                            type="text"
+                            type="number"
                             name="price_from"
                             aria-label="First name"
                             placeholder="From"
-                            class="form-control"
+                            class="form-control price-range-1"
+                            step="0.001"
                     />
                     <input
-                            type="text"
+                            type="number"
                             name="price_to"
                             aria-label="Last name"
                             placeholder="To"
-                            class="form-control"
+                            class="form-control price-range-2"
+                            step="0.001"
                     />
                 </div>
             </div>
@@ -50,16 +59,19 @@
                         type="date"
                         name="date"
                         placeholder="Date"
-                        class="form-control"
+                        class="form-control date"
                 />
             </div>
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary float-right">
                     <i class="fa fa-search"></i>
                 </button>
+<!--                filter-subit-btn -->
             </div>
         </div>
     </form>
+
+
     <div class="card-body">
         <div class="table-response">
             <table class="table">
@@ -160,4 +172,35 @@
         </div>
     </div>
 </div>
+
+<script>
+
+    function fileOnchange(e){
+        console.log(e.target);
+    }
+
+    const filter_submit_btn = document.querySelector('.filter-subit-btn');
+    //ajax starts
+
+                    filter_submit_btn.onclick = (e) => {
+                    let title = document.querySelector('.title').value;
+                    let varient = document.querySelector('.varient').value;
+                    let price_range_1 = document.querySelector('.price-range-1').value;
+                    let price_range_2 = document.querySelector('.price-range-2').value;
+                    let date = document.querySelector('.date').value;
+
+                        $.ajax({
+                         url:'/product/list/',
+                         type:'get',
+                         data: {
+                                title, varient, price_range_1, price_range_2, date
+                         },
+                         success: function(response){
+                            // updating total number of times played the game till now
+                            console.log('success');
+                         },
+                       });
+                    }
+                    //ajax ends
+</script>
 {% endblock %}

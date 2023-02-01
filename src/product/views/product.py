@@ -7,6 +7,8 @@ class CreateProductView(generic.TemplateView):
     template_name = 'products/create.html'
 
     def get_context_data(self, **kwargs):
+        print(kwargs)
+        print(self.kwargs)
         context = super(CreateProductView, self).get_context_data(**kwargs)
         variants = Variant.objects.filter(active=True).values('id', 'title')
         context['product'] = True
