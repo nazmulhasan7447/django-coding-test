@@ -9,8 +9,15 @@ Axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 Axios.defaults.xsrfCookieName = "csrftoken";
 
 const CreateProduct = (props) => {
-  const [productInfo, setProductInfo] = useState({});
+  const [showAlertMessage, setShowAlertMessage] = useState({
+    show: false,
+    status: "",
+  });
+  console.log(showAlertMessage);
   const [productVariantPrices, setProductVariantPrices] = useState([]);
+  const [productInfo, setProductInfo] = useState({
+    variants: productVariantPrices,
+  });
 
   const [productVariants, setProductVariant] = useState([
     {
@@ -73,17 +80,42 @@ const CreateProduct = (props) => {
           stock: 0,
         },
       ]);
+      setProductInfo({
+        ...productInfo,
+        variants: [
+          ...productVariantPrices,
+          {
+            index,
+            title: item,
+            price: 0,
+            stock: 0,
+          },
+        ],
+      });
     });
   };
 
   const varientHandler = (e, index) => {
-    setProductVariantPrices([
-      ...productVariantPrices?.filter((item) => item?.index !== index),
-      {
-        ...productVariantPrices?.filter((item) => item?.index === index)[0],
-        [e.target.name]: e.target.value,
-      },
-    ]);
+    console.log(productInfo?.variants);
+    console.log(e.target.value, index);
+    // setProductVariantPrices([
+    //   ...productVariantPrices?.filter((item) => item?.index !== index),
+    //   {
+    //     ...productVariantPrices?.filter((item) => item?.index === index)[0],
+    //     [e.target.name]: e.target.value,
+    //   },
+    // ]);
+    setProductInfo({
+      ...productInfo,
+      variants: [
+        ...productInfo?.variants?.filter((item) => item?.index !== index),
+        {
+          ...productInfo?.variants?.filter((item) => item?.index === index)[0],
+          [e.target.name]: e.target.value,
+        },
+      ],
+    });
+    console.log(productInfo);
   };
 
   // combination algorithm
@@ -105,15 +137,37 @@ const CreateProduct = (props) => {
   // Save product
   let saveProduct = (event) => {
     event.preventDefault();
+    console.log(productInfo);
     // TODO : write your code here to save the product
     Axios.post("/product/add/product/", {
       ...productInfo,
       productVariantPrices,
     })
       .then((response) => {
-        // console.log(response);
+        console.log(response);
+        if (response?.data === "success") {
+          setShowAlertMessage({
+            ...showAlertMessage,
+            show: true,
+            status: "success",
+          });
+        }
+        if (response?.data === "Something went wrong") {
+          setShowAlertMessage({
+            ...showAlertMessage,
+            show: true,
+            status: "warning",
+          });
+        }
       })
       .then((error) => {
+        if (response?.data === "Something went wrong") {
+          setShowAlertMessage({
+            ...showAlertMessage,
+            show: true,
+            status: "warning",
+          });
+        }
         // console.log(error);
       });
   };
@@ -121,6 +175,48 @@ const CreateProduct = (props) => {
   return (
     <div>
       <section>
+        {showAlertMessage?.show && showAlertMessage?.status === "success" ? (
+          <div className="row">
+            <div className="col-12">
+              <div
+                class="alert alert-success alert-dismissible fade show"
+                role="alert"
+              >
+                <strong>New product has been added successfully!</strong>
+                <button
+                  type="button"
+                  class="close"
+                  data-dismiss="alert"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : showAlertMessage?.show && showAlertMessage?.status === "warning" ? (
+          <div className="row">
+            <div className="col-12">
+              <div
+                class="alert alert-danger alert-dismissible fade show"
+                role="alert"
+              >
+                <strong>Something went wrong!</strong>
+                <button
+                  type="button"
+                  class="close"
+                  data-dismiss="alert"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
+
         <div className="row">
           <div className="col-md-6">
             <div className="card shadow mb-4">
