@@ -99,19 +99,12 @@ const CreateProduct = (props) => {
   }
 
   const hanldeProductInfoChange = (e) => {
-    console.log(e.target.name);
-    if (e.target.name === "testfile") {
-      console.log(e.target.files[0]);
-      setProductInfo({ ...productInfo, [e.target.name]: e.target.files[0] });
-    } else {
-      setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
-    }
+    setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
   };
 
   // Save product
   let saveProduct = (event) => {
     event.preventDefault();
-    console.log(productInfo);
     // TODO : write your code here to save the product
     Axios.post("/product/add/product/", {
       ...productInfo,
@@ -165,12 +158,6 @@ const CreateProduct = (props) => {
                 </div>
               </div>
             </div>
-
-            <input
-              type="file"
-              name="testfile"
-              onChange={hanldeProductInfoChange}
-            />
 
             <div className="card shadow mb-4">
               <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
