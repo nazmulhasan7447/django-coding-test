@@ -39,20 +39,20 @@ class Product(TimeStampMixin):
 
 
 class ProductImage(TimeStampMixin):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
     file_path = models.URLField(blank=True, null=True)
     img = models.ImageField(upload_to='product-image', blank=True, null=True)
 
 
 class ProductVariant(TimeStampMixin):
     variant_title = models.CharField(max_length=255)
-    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, blank=True, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.FloatField(default=0, blank=True, null=True)
     stock = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.variant_title + ' || ' + str(self.variant.title) + '|| product: ' + self.product.title
+        return self.variant_title + ' || ' + '|| product: ' + self.product.title
 
 
 class ProductVariantPrice(TimeStampMixin):

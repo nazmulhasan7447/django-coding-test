@@ -12,8 +12,6 @@ const CreateProduct = (props) => {
   const [productInfo, setProductInfo] = useState({});
   const [productVariantPrices, setProductVariantPrices] = useState([]);
 
-  console.log(productInfo);
-
   const [productVariants, setProductVariant] = useState([
     {
       option: 1,
@@ -79,9 +77,6 @@ const CreateProduct = (props) => {
   };
 
   const varientHandler = (e, index) => {
-    console.log(e.target.name);
-    // console.log("value", e);
-    // console.log("index", index);
     setProductVariantPrices([
       ...productVariantPrices?.filter((item) => item?.index !== index),
       {
@@ -104,13 +99,18 @@ const CreateProduct = (props) => {
   }
 
   const hanldeProductInfoChange = (e) => {
-    setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
+    console.log(e.target.name);
+    if (e.target.name === "testfile") {
+      console.log(e.target.files[0]);
+      setProductInfo({ ...productInfo, [e.target.name]: e.target.files[0] });
+    } else {
+      setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
+    }
   };
 
   // Save product
   let saveProduct = (event) => {
     event.preventDefault();
-    console.log(productVariantPrices);
     console.log(productInfo);
     // TODO : write your code here to save the product
     Axios.post("/product/add/product/", {
@@ -118,10 +118,10 @@ const CreateProduct = (props) => {
       productVariantPrices,
     })
       .then((response) => {
-        console.log(response);
+        // console.log(response);
       })
       .then((error) => {
-        console.log(error);
+        // console.log(error);
       });
   };
 
@@ -165,6 +165,12 @@ const CreateProduct = (props) => {
                 </div>
               </div>
             </div>
+
+            <input
+              type="file"
+              name="testfile"
+              onChange={hanldeProductInfoChange}
+            />
 
             <div className="card shadow mb-4">
               <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
