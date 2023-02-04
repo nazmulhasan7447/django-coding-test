@@ -23,11 +23,18 @@
       <div class="col-md-2">
         <select name="variant" id="" class="form-control varient">
           <option selected disabled>--Select A Variant--</option>
-          {% if varients %}
-            {% for varient in varients %}
-          <option value="{{varient.pk}}">{{varient.title}}</option>
-          {% endfor %}
-        {% endif %}
+                  <optgroup label="Color">
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="black">black</option>
+                  </optgroup>
+                 <optgroup label="Size">
+                    <option value="sm">Small</option>
+                    <option value="xl">Extra large</option>
+                    <option value="md">Medium</option>
+                    <option value="l">Large</option>
+                 </optgroup>
         </select>
       </div>
 
@@ -90,7 +97,7 @@
             <td>{{forloop.counter}}</td>
             <td>
               {{product.product.title}} <br />
-              Created at : {{ product.product.created_at|timesince }} ago
+              <strong>Created at:</strong> <small>{{ product.product.created_at|timesince }} ago</small>
             </td>
             <td>{{product.product.description}}</td>
             <td>
