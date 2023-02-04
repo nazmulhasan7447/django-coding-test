@@ -1,23 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import TagsInput from "react-tagsinput";
 import "react-tagsinput/react-tagsinput.css";
 import Dropzone from "react-dropzone";
 import Axios from "axios";
 import { size } from "lodash";
+import { data } from "jquery";
 
 Axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 Axios.defaults.xsrfCookieName = "csrftoken";
 
-const CreateProduct = (props) => {
+const EditProduct = (props) => {
+  const location = window.location.pathname;
   const [showAlertMessage, setShowAlertMessage] = useState({
     show: false,
     status: "",
   });
-  console.log(showAlertMessage);
   const [productVariantPrices, setProductVariantPrices] = useState([]);
-  const [productInfo, setProductInfo] = useState({
-    variants: productVariantPrices,
-  });
+  const [productInfo, setProductInfo] = useState({});
+
+  //   console.log(productVariantPrices);
+
+  //   console.log(productInfo);
 
   const [productVariants, setProductVariant] = useState([
     {
@@ -86,7 +90,7 @@ const CreateProduct = (props) => {
           ...productVariantPrices,
           {
             index,
-            title: item,
+            variant_title: item,
             price: 0,
             stock: 0,
           },
@@ -95,18 +99,42 @@ const CreateProduct = (props) => {
     });
   };
 
-  const varientHandler = (e, index) => {
-    setProductInfo({
-      ...productInfo,
-      variants: [
-        ...productInfo?.variants?.filter((item) => item?.index !== index),
+  const varientHandler = (e, id) => {
+    if (
+      e.target.name !== "product_name" ||
+      e.target.name !== "product_sku" ||
+      e.target.name !== "product_description"
+    ) {
+      setProductVariantPrices([
+        ...productVariantPrices?.filter((item) => item?.id !== id),
         {
-          ...productInfo?.variants?.filter((item) => item?.index === index)[0],
+          ...productVariantPrices?.filter((item) => item?.id === id)[0],
           [e.target.name]: e.target.value,
         },
-      ],
-    });
-    console.log(productInfo);
+      ]);
+      setProductInfo({
+        ...productInfo,
+        variants: [
+          ...productVariantPrices?.filter((item) => item?.id !== id),
+          {
+            ...productVariantPrices?.filter((item) => item?.id === id)[0],
+            [e.target.name]: e.target.value,
+          },
+        ],
+      });
+    }
+
+    if (
+      e.target.name === "product_name" ||
+      e.target.name === "product_sku" ||
+      e.target.name === "product_description"
+    ) {
+      setProductInfo({
+        ...productInfo,
+        [e.target.name]: e.target.value,
+      });
+    }
+    // console.log(productInfo);
   };
 
   // combination algorithm
@@ -125,14 +153,33 @@ const CreateProduct = (props) => {
     setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    Axios.get(`${location}product`)
+      .then((response) => {
+        // console.log(response);
+        if (response?.data) {
+          setProductInfo({
+            ...productInfo,
+            ...response?.data?.product,
+            variants: response?.data?.product_varients,
+          });
+          setProductVariantPrices(response?.data?.product_varients);
+        }
+      })
+      .then((error) => {
+        console.log(error);
+      });
+  }, []);
+
   // Save product
   let saveProduct = (event) => {
     event.preventDefault();
     console.log(productInfo);
+    console.log(productVariantPrices);
     // TODO : write your code here to save the product
-    Axios.post("/product/add/product/", {
+    Axios.post(`${location}product/`, {
       ...productInfo,
-      productVariantPrices,
+      variants: productVariantPrices,
     })
       .then((response) => {
         console.log(response);
@@ -218,7 +265,8 @@ const CreateProduct = (props) => {
                     type="text"
                     placeholder="Product Name"
                     className="form-control"
-                    name="product_name"
+                    name="title"
+                    value={productInfo?.title}
                     onChange={hanldeProductInfoChange}
                   />
                 </div>
@@ -228,7 +276,8 @@ const CreateProduct = (props) => {
                     type="text"
                     placeholder="Product SKU"
                     className="form-control"
-                    name="product_sku"
+                    name="sku"
+                    value={productInfo?.sku}
                     onChange={hanldeProductInfoChange}
                   />
                 </div>
@@ -239,8 +288,9 @@ const CreateProduct = (props) => {
                     cols="30"
                     rows="4"
                     className="form-control"
-                    name="product_description"
+                    name="description"
                     onChange={hanldeProductInfoChange}
+                    value={productInfo?.description}
                   ></textarea>
                 </div>
               </div>
@@ -277,74 +327,7 @@ const CreateProduct = (props) => {
 
           <div className="col-md-6">
             <div className="card shadow mb-4">
-              <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 className="m-0 font-weight-bold text-primary">Variants</h6>
-              </div>
-              <div className="card-body">
-                {productVariants.map((element, index) => {
-                  return (
-                    <div className="row" key={index}>
-                      <div className="col-md-4">
-                        <div className="form-group">
-                          <label htmlFor="">Option</label>
-                          <select
-                            className="form-control"
-                            defaultValue={element.option}
-                          >
-                            {JSON.parse(
-                              props.variants.replaceAll("'", '"')
-                            ).map((variant, index) => {
-                              return (
-                                <option key={index} value={variant.id}>
-                                  {variant.title}
-                                </option>
-                              );
-                            })}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="col-md-8">
-                        <div className="form-group">
-                          {productVariants.length > 1 ? (
-                            <label
-                              htmlFor=""
-                              className="float-right text-primary"
-                              style={{ marginTop: "-30px" }}
-                              onClick={() => removeProductVariant(index)}
-                            >
-                              remove
-                            </label>
-                          ) : (
-                            ""
-                          )}
-
-                          <section style={{ marginTop: "30px" }}>
-                            <TagsInput
-                              value={element.tags}
-                              style="margin-top:30px"
-                              onChange={(value) =>
-                                handleInputTagOnChange(value, index)
-                              }
-                            />
-                          </section>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="card-footer">
-                {productVariants.length !== 3 ? (
-                  <button className="btn btn-primary" onClick={handleAddClick}>
-                    Add another option
-                  </button>
-                ) : (
-                  ""
-                )}
-              </div>
-
-              <div className="card-header text-uppercase">Preview</div>
+              <div className="card-header text-uppercase">Product Variants</div>
               <div className="card-body">
                 <div className="table-responsive">
                   <table className="table">
@@ -359,14 +342,17 @@ const CreateProduct = (props) => {
                       {productVariantPrices.map(
                         (productVariantPrice, index) => {
                           return (
-                            <tr key={index}>
-                              <td>{productVariantPrice.title}</td>
+                            <tr key={productVariantPrice?.id}>
+                              <td>{productVariantPrice.variant_title}</td>
                               <td>
                                 <input
                                   className="form-control"
                                   name="price"
-                                  onChange={(e) => varientHandler(e, index)}
+                                  onChange={(e) => {
+                                    varientHandler(e, productVariantPrice?.id);
+                                  }}
                                   type="text"
+                                  value={productVariantPrice?.price}
                                 />
                               </td>
                               <td>
@@ -374,7 +360,10 @@ const CreateProduct = (props) => {
                                   className="form-control"
                                   type="text"
                                   name="stock"
-                                  onChange={(e) => varientHandler(e, index)}
+                                  value={productVariantPrice?.stock}
+                                  onChange={(e) =>
+                                    varientHandler(e, productVariantPrice?.id)
+                                  }
                                 />
                               </td>
                             </tr>
@@ -404,4 +393,4 @@ const CreateProduct = (props) => {
   );
 };
 
-export default CreateProduct;
+export default EditProduct;

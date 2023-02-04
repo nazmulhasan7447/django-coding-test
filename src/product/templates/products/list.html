@@ -1,206 +1,220 @@
 {% extends 'backend/base.html' %} {% block title %} Product List {% endblock %}
-{% load tag_library %}
-{% block content %}
+{% load tag_library %} {% block content %}
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Products</h1>
+  <h1 class="h3 mb-0 text-gray-800">Products</h1>
 </div>
 
-
-
 <div class="card">
-    <form action="{% url 'product:product_list' %}" method="GET" class="card-header">
+  <form
+    action="{% url 'product:product_list' %}"
+    method="GET"
+    class="card-header"
+  >
+    <div class="form-row justify-content-between">
+      <div class="col-md-2">
+        <input
+          type="text"
+          name="title"
+          placeholder="Product Title"
+          class="form-control title"
+        />
+      </div>
+      <div class="col-md-2">
+        <select name="variant" id="" class="form-control varient">
+          <option selected disabled>--Select A Variant--</option>
+          {% if varients %}
+            {% for varient in varients %}
+          <option value="{{varient.pk}}">{{varient.title}}</option>
+          {% endfor %}
+        {% endif %}
+        </select>
+      </div>
 
-        <div class="form-row justify-content-between">
-            <div class="col-md-2">
-                <input
-                        type="text"
-                        name="title"
-                        placeholder="Product Title"
-                        class="form-control title"
-                />
-            </div>
-            <div class="col-md-2">
-                <select name="variant" id="" class="form-control varient">
-                    <option selected disabled>--Select A Variant--</option>
-                    {% if varients %}
-                    {% for varient in varients %}
-                    <option value="{{varient.pk}}">{{varient.title}}</option>
-                    {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Price Range</span>
-                    </div>
-                    <input
-                            type="number"
-                            name="price_from"
-                            aria-label="First name"
-                            placeholder="From"
-                            class="form-control price-range-1"
-                            step="0.001"
-                    />
-                    <input
-                            type="number"
-                            name="price_to"
-                            aria-label="Last name"
-                            placeholder="To"
-                            class="form-control price-range-2"
-                            step="0.001"
-                    />
-                </div>
-            </div>
-            <div class="col-md-2">
-                <input
-                        type="date"
-                        name="date"
-                        placeholder="Date"
-                        class="form-control date"
-                />
-            </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-primary float-right">
-                    <i class="fa fa-search"></i>
-                </button>
-<!--                filter-subit-btn -->
-            </div>
+      <div class="col-md-3">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Price Range</span>
+          </div>
+          <input
+            type="number"
+            name="price_from"
+            aria-label="First name"
+            placeholder="From"
+            class="form-control price-range-1"
+            step="0.001"
+          />
+          <input
+            type="number"
+            name="price_to"
+            aria-label="Last name"
+            placeholder="To"
+            class="form-control price-range-2"
+            step="0.001"
+          />
         </div>
-    </form>
+      </div>
+      <div class="col-md-2">
+        <input
+          type="date"
+          name="date"
+          placeholder="Date"
+          class="form-control date"
+        />
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary float-right">
+          <i class="fa fa-search"></i>
+        </button>
+        <!--                filter-subit-btn -->
+      </div>
+    </div>
+  </form>
 
+  <div class="card-body">
+    <div class="table-response">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Variant</th>
+            <th width="150px">Action</th>
+          </tr>
+        </thead>
 
-    <div class="card-body">
-        <div class="table-response">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Variant</th>
-                    <th width="150px">Action</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                {% if products %}
-                {% for product in products %}
-                <tr>
-                    <td>{{forloop.counter}}</td>
-                    <td>
-                        {{product.product.title}} <br/>
-                        Created at : {{ product.product.created_at|timesince }} ago
-                    </td>
-                    <td>{{product.product.description}}</td>
-                    <td>
-                        <dl
-                                class="row mb-0"
-                                style="height: 80px; overflow: hidden"
-                                id="variant-{{product.pk}}"
-                        >
-                            {% if product.product_varients %}
-                            {% for varient in product.product_varients.all %}
-                            <dt class="col-sm-3 pb-0">{{varient.variant.title}}</dt>
-                            <dd class="col-sm-9">
-                                <dl class="row mb-0">
-                                    <dd class="col-sm-4 pb-0">Price : {{varient.price}}</dd>
-                                    <dd class="col-sm-8 pb-0">InStock : {{varient.stock}}</dd>
-                                </dl>
-                            </dd>
-                            {% endfor %}
-                            {% endif %}
-                        </dl>
-                        <button
-                                onclick="$('#variant-{{product.pk}}').toggleClass('h-auto')"
-                                class="btn btn-sm btn-link"
-                        >
-                            Show more
-                        </button>
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a href="" class="btn btn-success">Edit</a>
-                        </div>
-                    </td>
-                </tr>
+        <tbody>
+          {% if products %} {% for product in products %}
+          <tr>
+            <td>{{forloop.counter}}</td>
+            <td>
+              {{product.product.title}} <br />
+              Created at : {{ product.product.created_at|timesince }} ago
+            </td>
+            <td>{{product.product.description}}</td>
+            <td>
+              <dl
+                class="row mb-0"
+                style="height: 80px; overflow: hidden"
+                id="variant-{{product.pk}}"
+              >
+                {% if product.product_varients %}
+                  {% for varient in product.product_varients.all %}
+                <dt class="col-sm-3 pb-0">{{varient.variant_title}}</dt>
+                <dd class="col-sm-9">
+                  <dl class="row mb-0">
+                    <dd class="col-sm-4 pb-0">Price : {{varient.price}}</dd>
+                    <dd class="col-sm-8 pb-0">InStock : {{varient.stock}}</dd>
+                  </dl>
+                </dd>
                 {% endfor %}
-                {% endif %}
-                </tbody>
-            </table>
-        </div>
+                  {% endif %}
+              </dl>
+              <button
+                onclick="$('#variant-{{product.pk}}').toggleClass('h-auto')"
+                class="btn btn-sm btn-link"
+              >
+                Show more
+              </button>
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <a
+                  href="{% url 'product:update.product' pk=product.pk %}"
+                  class="btn btn-success"
+                  >Edit</a
+                >
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="card-footer">
-        <div class="row justify-content-between">
-            <div class="col-md-6">
-                <p>Showing {{ page_obj.start_index }} to {{ page_obj.end_index }}
-                    out of {{page_obj.paginator.count}}</p>
-            </div>
-            <div class="col-md-6 d-flex justify-content-end">
-                <nav aria-label="...">
-                    <ul class="pagination">
-                        <li class="page-item">
-                            {% if page_obj.has_previous %}
-                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Previous</a>
-                            {% else %}
-                            <a href="" class="btn page-link disabled">Previous</a>
-                            {% endif %}
-                        </li>
+  <div class="card-footer">
+    <div class="row justify-content-between">
+      <div class="col-md-6">
+        <p>
+          Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} out of
+          {{page_obj.paginator.count}}
+        </p>
+      </div>
+      <div class="col-md-6 d-flex justify-content-end">
+        <nav aria-label="...">
+          <ul class="pagination">
+            <li class="page-item">
+              {% if page_obj.has_previous %}
+              <a
+                href="?page={{ page_obj.previous_page_number }}"
+                class="page-link"
+                >Previous</a
+              >
+              {% else %}
+              <a href="" class="btn page-link disabled">Previous</a>
+              {% endif %}
+            </li>
 
-                        {% for page in page_obj.paginator.page_range %}
-                        {% if page == page_obj.number %}
-                        <li class="page-item active">
-                            <a class="page-link" href="?page={{ page }}"> {{ page }} <span
-                                    class="sr-only">(current)</span></a>
-                        </li>
-                        {% else %}
-                        <li class="page-item"><a class="page-link" href="?page={{ page }}">{{ page }}</a></li>
-                        {% endif %}
-                        {% endfor %}
+            {% for page in page_obj.paginator.page_range %} {% if page == page_obj.number %}
+            <li class="page-item active">
+              <a class="page-link" href="?page={{ page }}">
+                {{ page }} <span class="sr-only">(current)</span></a
+              >
+            </li>
+            {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+            </li>
+            {% endif %} {% endfor %}
 
-                        <li class="page-item">
-                            {% if page_obj.has_next %}
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                            {% endif %}
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
+            <li class="page-item">
+              {% if page_obj.has_next %}
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+                >Next</a
+              >
+              {% endif %}
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
+  function fileOnchange(e) {
+    console.log(e.target);
+  }
 
-    function fileOnchange(e){
-        console.log(e.target);
-    }
+  const filter_submit_btn = document.querySelector(".filter-subit-btn");
+  //ajax starts
 
-    const filter_submit_btn = document.querySelector('.filter-subit-btn');
-    //ajax starts
+  filter_submit_btn.onclick = (e) => {
+    let title = document.querySelector(".title").value;
+    let varient = document.querySelector(".varient").value;
+    let price_range_1 = document.querySelector(".price-range-1").value;
+    let price_range_2 = document.querySelector(".price-range-2").value;
+    let date = document.querySelector(".date").value;
 
-                    filter_submit_btn.onclick = (e) => {
-                    let title = document.querySelector('.title').value;
-                    let varient = document.querySelector('.varient').value;
-                    let price_range_1 = document.querySelector('.price-range-1').value;
-                    let price_range_2 = document.querySelector('.price-range-2').value;
-                    let date = document.querySelector('.date').value;
-
-                        $.ajax({
-                         url:'/product/list/',
-                         type:'get',
-                         data: {
-                                title, varient, price_range_1, price_range_2, date
-                         },
-                         success: function(response){
-                            // updating total number of times played the game till now
-                            console.log('success');
-                         },
-                       });
-                    }
-                    //ajax ends
+    $.ajax({
+      url: "/product/list/",
+      type: "get",
+      data: {
+        title,
+        varient,
+        price_range_1,
+        price_range_2,
+        date,
+      },
+      success: function (response) {
+        // updating total number of times played the game till now
+        console.log("success");
+      },
+    });
+  };
+  //ajax ends
 </script>
 {% endblock %}

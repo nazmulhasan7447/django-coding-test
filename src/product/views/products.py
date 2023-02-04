@@ -2,8 +2,6 @@ from ..models import Product, ProductImage, ProductVariant, ProductVariantPrice,
 from django.shortcuts import render, redirect
 from django.views.generic.list import ListView
 from django.views import View
-from django.views.generic.edit import FormMixin
-from django.views.generic.detail import SingleObjectMixin
 from django.db.models import Q
 from datetime import datetime
 from django.utils import timezone
